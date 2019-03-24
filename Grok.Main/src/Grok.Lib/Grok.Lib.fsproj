@@ -9,7 +9,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="FParsec" Version="1.0.3" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="FParsecCS">
+      <HintPath>/home/bjorn/.nuget/packages/fparsec/1.0.3/lib/netstandard1.6/FParsecCS.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>
