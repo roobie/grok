@@ -23,10 +23,8 @@ module Ast =
 
 module Parser =
 
-    open FParsec
     open FParsec.Primitives
     open FParsec.CharParsers
-    open FParsec.OperatorPrecedenceParser
 
     open Ast
 
@@ -36,7 +34,7 @@ module Parser =
     // 8. utility functions
     let spaces1 : LispParser<unit> = skipMany1 spaces
     let chr c = skipChar c
-    let endBy  p sep = many  (p .>> sep)
+    let endBy p sep = many  (p .>> sep)
 
     let symbol : LispParser<char> = anyOf "!$%&|*+-/:<=>?@^_~#"
 
@@ -117,7 +115,6 @@ module Errors =
 
     open FParsec.Primitives
     open FParsec.CharParsers
-    open FParsec.OperatorPrecedenceParser
 
     open Ast
     open Parser
@@ -151,7 +148,6 @@ module SymbolTable =
 
     open FParsec.Primitives
     open FParsec.CharParsers
-    open FParsec.OperatorPrecedenceParser
 
     open Ast
     open Parser
@@ -192,7 +188,6 @@ module Eval =
 
     open FParsec.Primitives
     open FParsec.CharParsers
-    open FParsec.OperatorPrecedenceParser
 
     open Ast
     open Parser
@@ -202,6 +197,7 @@ module Eval =
     open System.IO
 
     let readOrThrow parser input =
+        printfn "%A" input
         match run parser input with
         | Success (v, _, _) -> v
         | Failure (msg, err, _) -> raise (LispException(ParseError(msg, err)))
@@ -364,41 +360,41 @@ module Eval =
     // and creates tuples in env (op name, primitiveFunc (function))
     let rec primitives =
          [
-            "+",    numericBinop (+)
-            "-",    numericBinop (-)
-            "*",    numericBinop (*)
-            "/",    numericBinop (/)
-            "mod",  numericBinop (%)
-            "=",    numBoolBinop (=)
-            "<",    numBoolBinop (<)
-            ">",    numBoolBinop (>)
-            "/=",   numBoolBinop (<>)
-            ">=",   numBoolBinop (>=)
-            "<=",   numBoolBinop (<=)
-            "&&",   boolBoolBinop (&&)
-            "||",   boolBoolBinop (||)
-            "string=?",     strBoolBinop (=)
-            "string>?",      strBoolBinop (>)
-            "string<?",      strBoolBinop (<)
-            "string<=?",    strBoolBinop (<=)
-            "string>=?",    strBoolBinop (>=)
+            "+",   numericBinop (+)
+            "-",   numericBinop (-)
+            "*",   numericBinop (*)
+            "/",   numericBinop (/)
+            "mod", numericBinop (%)
+            "=",   numBoolBinop (=)
+            "<",   numBoolBinop (<)
+            ">",   numBoolBinop (>)
+            "/=",  numBoolBinop (<>)
+            ">=",  numBoolBinop (>=)
+            "<=",  numBoolBinop (<=)
+            "&&",  boolBoolBinop (&&)
+            "||",  boolBoolBinop (||)
+            "string=?",  strBoolBinop (=)
+            "string>?",  strBoolBinop (>)
+            "string<?",  strBoolBinop (<)
+            "string<=?", strBoolBinop (<=)
+            "string>=?", strBoolBinop (>=)
             "car",  car
             "cdr",  cdr
             "cons", cons
-            "eq?", eqv
-            "eqv?", eqv
+            "eq?",    eqv
+            "eqv?",   eqv
             "equal?", equal
 
             // IO primitives
             "apply", applyProc
-            "open-input-file", makePort FileAccess.Read
-            "open-output-file", makePort FileAccess.Write
-            "close-input-port", closePort
+            "open-input-file",   makePort FileAccess.Read
+            "open-output-file",  makePort FileAccess.Write
+            "close-input-port",  closePort
             "close-output-port", closePort
-            "read", readProc
+            "read",  readProc
             "write", writeProc
             "read-contents", readContents
-            "read-all", readAll
+            "read-all",      readAll
          ]
 
     // 2. If it is a Func (user defined), check parms correctness, then bind the parameters and their values
@@ -486,7 +482,6 @@ module Repl =
     open System
     open FParsec.Primitives
     open FParsec.CharParsers
-    open FParsec.OperatorPrecedenceParser
 
     open Ast
     open Parser
@@ -547,12 +542,3 @@ module Repl =
                     |> loadStdLib
                     |> bindVars [ "args", List (List.map String args) ]
         List [Atom "load"; String filename] |> eval env |> showVal |> printStr
-
-
-    // 1. Either run a REPL window or execute one expression
-    [<EntryPoint>]
-    let main(args: string[]) =
-        match Array.toList args with
-        | [] -> runRepl ()
-        | filename :: args -> runOne filename args
-        0
