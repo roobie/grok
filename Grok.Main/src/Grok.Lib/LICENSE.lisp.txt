@@ -1,0 +1,15 @@
+Lisp stuff based on Write Yourself a Scheme in 48 Hours in F#
+found here http://code.msdn.microsoft.com/Write-Yourself-a-Scheme-in-d50ae449
+This was released with Apache 2.0 license
+
+This means that the modules
+Ast
+Errors
+Eval
+Parser
+Repl
+SymbolTable
+and stdlib.scm
+
+are verbatim copies or heavily influenced by the above work.
+

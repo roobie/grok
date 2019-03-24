@@ -32,7 +32,6 @@ module Parser =
     type LispParser = Parser<LispVal, unit>
 
     // 8. utility functions
-    let spaces1 : LispParser<unit> = skipMany1 spaces
     let chr c = skipChar c
     let endBy p sep = many  (p .>> sep)
 
@@ -50,17 +49,12 @@ module Parser =
 
     // 3. Starts with a letter or symbol followed by many of letter/symbol/digit, special case for Bool
     let parseAtom : LispParser = parse {
-            // let! first = letter <|> symbol
-            // let! rest = manyChars (letter <|> symbol <|> digit)
-            // return match first.ToString() + rest with
-            //        | "#t" -> Bool true
-            //        | "#f" -> Bool false
-            //        | atom -> Atom atom
-        let! sym = many1Chars (letter <|> symbol)
-        return match sym with
-            | "true" -> Bool true
-            | "false" -> Bool false
-            | atom -> Atom atom
+            let! first = letter <|> symbol
+            let! rest = manyChars (letter <|> symbol <|> digit)
+            return match first.ToString() + rest with
+                   | "#t" -> Bool true
+                   | "#f" -> Bool false
+                   | atom -> Atom atom
     }
 
     // 4. 1 .. N digits, parsed and put into number, comment on function composition ...
@@ -202,7 +196,6 @@ module Eval =
     open System.IO
 
     let readOrThrow parser input =
-        printfn "%A" input
         match run parser input with
         | Success (v, _, _) -> v
         | Failure (msg, err, _) -> raise (LispException(ParseError(msg, err)))
@@ -521,6 +514,8 @@ module Repl =
         if not (pred result) then
             evaluator result
             until pred prompter evaluator
+        else
+            printf "Good-bye.%s" Environment.NewLine
 
     // 11. Got through everything in 'primitive' and add it to the environment
     // After this step move to Ast.fs
@@ -537,7 +532,7 @@ module Repl =
     // (evalAndPrint should return an env if we wanted this to be side effect free)
     let runRepl () =
         let env = primitiveBindings () |> loadStdLib
-        until (fun s -> s = "Quit" || s = "quit") (fun () -> readPrompt "Lisp>>> ") (evalAndPrint env)
+        until (fun s -> s = "Quit" || s = "quit" || isNull s) (fun () -> readPrompt "GrokLisp# ") (evalAndPrint env)
 
     // 2. Load the primitive operations (+, -, ...), the standard library
     // and add to the environment args.[1..N] as a list of Strings
