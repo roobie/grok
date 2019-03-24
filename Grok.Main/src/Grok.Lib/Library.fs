@@ -50,12 +50,17 @@ module Parser =
 
     // 3. Starts with a letter or symbol followed by many of letter/symbol/digit, special case for Bool
     let parseAtom : LispParser = parse {
-            let! first = letter <|> symbol
-            let! rest = manyChars (letter <|> symbol <|> digit)
-            return match first.ToString() + rest with
-                   | "#t" -> Bool true
-                   | "#f" -> Bool false
-                   | atom -> Atom atom
+            // let! first = letter <|> symbol
+            // let! rest = manyChars (letter <|> symbol <|> digit)
+            // return match first.ToString() + rest with
+            //        | "#t" -> Bool true
+            //        | "#f" -> Bool false
+            //        | atom -> Atom atom
+        let! sym = many1Chars (letter <|> symbol)
+        return match sym with
+            | "true" -> Bool true
+            | "false" -> Bool false
+            | atom -> Atom atom
     }
 
     // 4. 1 .. N digits, parsed and put into number, comment on function composition ...
